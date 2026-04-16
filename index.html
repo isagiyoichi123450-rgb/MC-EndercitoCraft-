@@ -135,8 +135,11 @@ auth.getRedirectResult().then((result) => {
 });
 
         function cerrarSesion() {
-            auth.signOut();
+    auth.signOut().then(() => {
+        window.location.reload();
+    });
         }
+        
 
         auth.onAuthStateChanged((user) => {
             const btnPublicar = document.getElementById('btn-menu-publicar');
