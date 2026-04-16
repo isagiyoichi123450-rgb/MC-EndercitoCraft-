@@ -11,92 +11,71 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body { background: radial-gradient(circle at top, #1a1a2e, #0b0b0b); color: white; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        body { background: radial-gradient(circle at top, #1a1a2e, #0b0b0b); color: white; font-family: 'Inter', sans-serif; min-height: 100vh; margin: 0; }
         .liquid-glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
         .menu-lateral { transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-100%); }
         .menu-lateral.active { transform: translateX(0); }
-        .addon-card { transition: all 0.3s ease; }
-        .addon-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.07); border-color: #3b82f6; }
         .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); transition: 0.2s; }
-        .btn-primary:active { scale: 0.98; }
+        .btn-primary:active { scale: 0.95; }
         .loading-spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="max-w-lg mx-auto pb-24">
 
-    <div id="modal-detalle" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-        <div class="liquid-glass w-full max-w-sm p-6 relative">
-            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-2xl hover:text-red-500">✕</button>
-            <img id="modal-img" src="" class="w-full h-52 object-cover rounded-2xl mb-4 shadow-xl border border-white/10">
-            <div id="modal-tag" class="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold mb-2 uppercase"></div>
-            <h2 id="modal-title" class="text-2xl font-black text-white italic uppercase mb-2"></h2>
-            <p id="modal-desc" class="text-sm text-gray-400 bg-white/5 p-4 rounded-xl mb-6 max-h-32 overflow-y-auto"></p>
-            <div id="modal-autor" class="text-[10px] text-gray-500 mb-4 italic text-right"></div>
-            <a id="modal-link" href="#" target="_blank" class="btn-primary block w-full py-4 rounded-2xl font-black text-center shadow-lg shadow-blue-500/20">DESCARGAR AHORA</a>
-        </div>
-    </div>
-
     <div id="sidebar" class="fixed inset-y-0 left-0 w-72 liquid-glass z-50 p-6 menu-lateral m-2 shadow-2xl">
         <h2 class="font-black text-blue-400 text-3xl italic mb-10 tracking-tighter">MC ENDER</h2>
         <nav class="space-y-3">
             <button onclick="irA('inicio')" class="w-full text-left p-4 rounded-2xl bg-white/5 hover:bg-white/10 font-bold transition">🏠 Inicio</button>
-            <button id="btn-menu-publicar" onclick="irA('publicar')" class="hidden w-full text-left p-4 rounded-2xl bg-white/5 hover:bg-white/10 font-bold transition border border-blue-500/20">🚀 Publicar Addon</button>
+            <button id="btn-menu-publicar" onclick="irA('publicar')" class="hidden w-full text-left p-4 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 font-bold transition border border-blue-500/30">🚀 Publicar Addon</button>
             <hr class="border-white/10 my-4">
+            
             <div id="auth-container">
-                <button id="btn-login" onclick="iniciarSesion()" class="w-full text-left p-4 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 font-bold transition border border-blue-500/50">🔵 Entrar con Google</button>
-                <button id="btn-logout" onclick="cerrarSesion()" class="hidden w-full text-left p-4 rounded-2xl bg-red-600/10 hover:bg-red-600/20 font-bold transition border border-red-500/20 text-red-400">🚪 Cerrar Sesión</button>
+                <button id="btn-login" onclick="iniciarSesion()" class="w-full text-left p-4 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 font-bold transition border border-blue-500/50">
+                    🔵 Continuar con Google
+                </button>
+                <div id="perfil-usuario" class="hidden">
+                    <div class="p-4 rounded-2xl bg-white/5 mb-2 border border-white/10">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Usuario</p>
+                        <p id="nombre-usuario" class="font-black text-blue-400 truncate"></p>
+                    </div>
+                    <button onclick="cerrarSesion()" class="w-full text-left p-4 rounded-2xl bg-red-600/10 hover:bg-red-600/20 font-bold transition border border-red-500/20 text-red-400">🚪 Cerrar Sesión</button>
+                </div>
             </div>
         </nav>
     </div>
 
-    <header class="flex items-center justify-between p-6 sticky top-0 z-40 bg-[#0b0b0b]/50 backdrop-blur-md">
-        <button onclick="toggleMenu()" class="liquid-glass p-3 px-5 text-xl active:scale-90 transition">☰</button>
+    <header class="flex items-center justify-between p-6 sticky top-0 z-40 bg-black/50 backdrop-blur-md">
+        <button onclick="toggleMenu()" class="liquid-glass p-3 px-5 text-xl">☰</button>
         <div class="text-right">
             <h1 class="text-2xl font-black text-blue-400 italic tracking-tighter">MC ENDER</h1>
-            <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Community Hub</p>
+            <p id="status" class="text-[8px] text-gray-500 font-bold uppercase tracking-widest italic">Desconectado</p>
         </div>
     </header>
 
     <main class="p-4">
         <div id="seccion-inicio">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-black italic uppercase text-gray-400">Recientes</h3>
-                <div class="h-[1px] flex-1 bg-white/10 ml-4"></div>
-            </div>
             <div id="lista-addons" class="space-y-4 text-center">
-                <div class="inline-block loading-spinner" id="main-loader" style="display: inline-block;"></div>
+                <div class="loading-spinner inline-block" id="loader-principal" style="display: inline-block;"></div>
             </div>
         </div>
 
         <div id="seccion-publicar" class="hidden">
-            <div class="liquid-glass p-6">
+            <div class="liquid-glass p-6 border-blue-500/20">
                 <h2 class="text-xl font-black mb-6 text-blue-400 italic text-center uppercase">Subir Contenido</h2>
                 <div class="space-y-4">
-                    <input type="text" id="add-title" placeholder="Nombre del Addon" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none focus:border-blue-500">
-                    <select id="add-category" class="w-full bg-[#1a1a2e] p-4 rounded-2xl border border-white/10 outline-none text-gray-400">
-                        <option value="Addon">Tipo: Addon</option>
-                        <option value="Texture">Tipo: Textura</option>
-                        <option value="Map">Tipo: Mapa</option>
-                        <option value="Other">Tipo: Otro</option>
-                    </select>
-                    <textarea id="add-desc" placeholder="¿De qué trata tu creación?..." class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 h-24 resize-none focus:border-blue-500"></textarea>
-                    <input type="text" id="add-link" placeholder="Link de descarga (Mediafire/Drive)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 focus:border-blue-500">
-                    <label class="w-full bg-white/5 p-6 rounded-3xl border-2 border-dashed border-white/10 flex flex-col items-center cursor-pointer hover:bg-white/10 transition">
-                        <span id="file-name" class="text-[10px] font-black uppercase text-gray-400">Seleccionar Miniatura</span>
-                        <input type="file" id="add-image" accept="image/*" class="hidden" onchange="actualizarNombreArchivo(this)">
-                    </label>
-                    <button id="btn-subir" onclick="publicarAddon()" class="btn-primary w-full py-4 rounded-2xl font-black flex items-center justify-center gap-3">
-                        <span id="btn-text">SUBIR AHORA</span>
-                        <div id="btn-loader" class="loading-spinner"></div>
-                    </button>
+                    <input type="text" id="add-title" placeholder="Nombre" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none">
+                    <textarea id="add-desc" placeholder="Descripción..." class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 h-24 resize-none"></textarea>
+                    <input type="text" id="add-link" placeholder="Link (Mediafire/Drive)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <input type="file" id="add-image" accept="image/*" class="w-full text-xs text-gray-500">
+                    <button onclick="publicarAddon()" id="btn-subir" class="btn-primary w-full py-4 rounded-2xl font-black">PUBLICAR AHORA</button>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        // --- 2. CONFIGURACIÓN DE FIREBASE ---
+        // CONFIGURACIÓN DE TU CUENTA NUEVA
         const firebaseConfig = {
             apiKey: "AIzaSyDnui2ui53sn30EDm3daaIdbt9-oVdJQng",
             authDomain: "addonverse-78e65.firebaseapp.com",
@@ -106,150 +85,108 @@
             appId: "1:862103750236:web:3df64155e18cf90211c899"
         };
 
-        // Inicialización segura
+        // INICIALIZACIÓN SIN ERRORES
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
         const provider = new firebase.auth.GoogleAuthProvider();
 
-        let usuarioActual = null;
+        let userLogueado = null;
 
-        // --- 3. LÓGICA DE USUARIO (REDIRECCIÓN) ---
+        // --- ARREGLO DE GOOGLE (MÉTODO REDIRECT) ---
         function iniciarSesion() {
-            console.log("Iniciando redirección a Google...");
+            // Este comando saca al usuario de la página para elegir su cuenta
             auth.signInWithRedirect(provider);
         }
 
         function cerrarSesion() {
-            auth.signOut().then(() => {
-                window.location.reload();
-            });
+            auth.signOut().then(() => { window.location.reload(); });
         }
 
-        // Recuperar sesión al volver de Google
+        // Esta parte es la que "atrapa" al usuario cuando regresa de Google
         auth.getRedirectResult().then((result) => {
-            if (result && result.user) {
-                console.log("Usuario detectado tras redirección");
+            if (result.user) {
+                console.log("Sesión recuperada con éxito");
             }
         }).catch((error) => {
-            console.error("Error en redirección:", error.message);
+            console.error("Error en el regreso de Google:", error.message);
         });
 
+        // Monitor de estado de usuario
         auth.onAuthStateChanged((user) => {
-            const btnPublicar = document.getElementById('btn-menu-publicar');
             const btnLogin = document.getElementById('btn-login');
-            const btnLogout = document.getElementById('btn-logout');
+            const perfil = document.getElementById('perfil-usuario');
+            const btnPub = document.getElementById('btn-menu-publicar');
+            const status = document.getElementById('status');
 
             if (user) {
-                usuarioActual = user;
-                if(btnPublicar) btnPublicar.classList.remove('hidden');
-                if(btnLogin) btnLogin.classList.add('hidden');
-                if(btnLogout) btnLogout.classList.remove('hidden');
+                userLogueado = user;
+                btnLogin.classList.add('hidden');
+                perfil.classList.remove('hidden');
+                btnPub.classList.remove('hidden');
+                document.getElementById('nombre-usuario').innerText = user.displayName;
+                status.innerText = "Conectado como " + user.displayName;
+                status.classList.replace('text-gray-500', 'text-blue-400');
             } else {
-                usuarioActual = null;
-                if(btnPublicar) btnPublicar.classList.add('hidden');
-                if(btnLogin) btnLogin.classList.remove('hidden');
-                if(btnLogout) btnLogout.classList.add('hidden');
+                userLogueado = null;
+                btnLogin.classList.remove('hidden');
+                perfil.classList.add('hidden');
+                btnPub.classList.add('hidden');
+                status.innerText = "Desconectado";
             }
         });
 
-        // --- NAVEGACIÓN ---
+        // NAVEGACIÓN
         function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); }
-        
-        function irA(seccion) {
+        function irA(sec) {
+            document.getElementById('seccion-inicio').classList.add('hidden');
+            document.getElementById('seccion-publicar').classList.add('hidden');
+            document.getElementById('seccion-' + sec).classList.remove('hidden');
             if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
-            ['inicio', 'publicar'].forEach(s => {
-                const el = document.getElementById('seccion-' + s);
-                if(el) el.classList.add('hidden');
-            });
-            const target = document.getElementById('seccion-' + seccion);
-            if(target) target.classList.remove('hidden');
-            window.scrollTo(0,0);
         }
 
-        function actualizarNombreArchivo(input) {
-            if (input.files[0]) {
-                const name = input.files[0].name;
-                document.getElementById('file-name').innerText = "✅ " + name.toUpperCase();
-            }
-        }
-
-        // --- RENDERIZADO DE DATOS ---
-        db.collection("addons").orderBy("fecha", "desc").onSnapshot((snapshot) => {
+        // MOSTRAR ADDONS
+        db.collection("addons").orderBy("fecha", "desc").onSnapshot((snap) => {
             const lista = document.getElementById('lista-addons');
-            const mainLoader = document.getElementById('main-loader');
-            if(mainLoader) mainLoader.style.display = "none";
-            
-            lista.innerHTML = ""; 
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const card = `
-                    <div onclick="abrirModal(\`${data.titulo}\`, \`${data.descripcion}\`, \`${data.link}\`, \`${data.foto}\`, \`${data.categoria || 'Addon'}\`, \`${data.autor || 'Anónimo'}\`)" 
-                         class="liquid-glass p-3 flex gap-4 items-center addon-card border border-white/5 mb-4 shadow-xl">
-                        <img src="${data.foto}" class="w-20 h-20 rounded-xl object-cover border border-white/10 shadow-lg">
+            document.getElementById('loader-principal').style.display = "none";
+            lista.innerHTML = "";
+            snap.forEach((doc) => {
+                const d = doc.data();
+                lista.innerHTML += `
+                    <div class="liquid-glass p-3 flex gap-4 items-center border border-white/5 mb-4 shadow-xl">
+                        <img src="${d.foto}" class="w-16 h-16 rounded-xl object-cover">
                         <div class="flex-1 text-left">
-                            <span class="text-[8px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold uppercase">${data.categoria || 'Addon'}</span>
-                            <div class="text-lg font-black text-white uppercase italic leading-tight mt-1">${data.titulo}</div>
-                            <p class="text-[7px] text-gray-500 font-bold uppercase mt-1 tracking-widest">Subido por: ${data.autor || 'Admin'}</p>
+                            <div class="text-sm font-black text-white uppercase italic">${d.titulo}</div>
+                            <p class="text-[7px] text-gray-500 uppercase mt-1">Por: ${d.autor}</p>
                         </div>
+                        <a href="${d.link}" target="_blank" class="bg-blue-500 p-2 rounded-lg text-[10px] font-bold">LINK</a>
                     </div>`;
-                lista.insertAdjacentHTML('beforeend', card);
             });
         });
 
-        // --- PUBLICAR ---
+        // SUBIR ADDON
         function publicarAddon() {
-            if(!usuarioActual) return alert("Debes iniciar sesión para publicar.");
+            if(!userLogueado) return alert("Inicia sesión primero");
+            const t = document.getElementById('add-title').value;
+            const d = document.getElementById('add-desc').value;
+            const l = document.getElementById('add-link').value;
+            const f = document.getElementById('add-image').files[0];
 
-            const titulo = document.getElementById('add-title').value;
-            const desc = document.getElementById('add-desc').value;
-            const link = document.getElementById('add-link').value;
-            const cat = document.getElementById('add-category').value;
-            const imagenInput = document.getElementById('add-image');
-            const btn = document.getElementById('btn-subir');
-            const loader = document.getElementById('btn-loader');
+            if(!t || !f) return alert("Falta el título o la imagen");
 
-            if(!titulo || !desc || !link || !imagenInput.files[0]) return alert("Faltan datos, bro.");
-            if(imagenInput.files[0].size > 850000) return alert("Imagen muy pesada (máx 800KB).");
-
-            btn.disabled = true;
-            if(loader) loader.style.display = "block";
-
-            const lector = new FileReader();
-            lector.onload = function(e) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
                 db.collection("addons").add({
-                    titulo: titulo, 
-                    descripcion: desc, 
-                    link: link, 
-                    categoria: cat,
-                    foto: e.target.result, 
-                    autor: usuarioActual.displayName,
-                    uid: usuarioActual.uid,
+                    titulo: t, descripcion: d, link: l,
+                    foto: e.target.result, autor: userLogueado.displayName,
                     fecha: Date.now()
                 }).then(() => {
-                    alert("¡Publicado con éxito!");
-                    window.location.reload();
-                }).catch(err => {
-                    alert("Error al subir.");
-                    btn.disabled = false;
-                    if(loader) loader.style.display = "none";
+                    alert("¡Publicado!");
+                    irA('inicio');
                 });
             };
-            lector.readAsDataURL(imagenInput.files[0]);
+            reader.readAsDataURL(f);
         }
-
-        function abrirModal(titulo, desc, link, img, cat, autor) {
-            document.getElementById('modal-title').innerText = titulo;
-            document.getElementById('modal-desc').innerText = desc;
-            document.getElementById('modal-link').href = link;
-            document.getElementById('modal-img').src = img;
-            document.getElementById('modal-tag').innerText = cat;
-            document.getElementById('modal-autor').innerText = "By: " + autor;
-            document.getElementById('modal-detalle').classList.remove('hidden');
-        }
-
-        function cerrarModal() { document.getElementById('modal-detalle').classList.add('hidden'); }
     </script>
 </body>
-                        </html>
-                        
+</html>
