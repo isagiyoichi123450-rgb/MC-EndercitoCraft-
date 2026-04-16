@@ -121,8 +121,18 @@
 
         // --- LÓGICA DE USUARIO ---
         function iniciarSesion() {
-            auth.signInWithPopup(provider).catch(err => alert("Error: " + err.message));
-        }
+    // Esto en lugar de abrir una ventana, mueve toda la página a Google
+    auth.signInWithRedirect(provider);
+}
+
+// Añade esto debajo para que cuando regrese de Google, reconozca al usuario
+auth.getRedirectResult().then((result) => {
+    if (result && result.user) {
+        console.log("Sesión iniciada correctamente");
+    }
+}).catch((error) => {
+    console.error("Error al volver de Google:", error.message);
+});
 
         function cerrarSesion() {
             auth.signOut();
