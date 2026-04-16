@@ -36,11 +36,8 @@
         <h2 class="font-black text-blue-400 text-3xl italic mb-10 tracking-tighter">MC ENDER</h2>
         <nav class="space-y-3">
             <button onclick="irA('inicio')" class="w-full text-left p-4 rounded-2xl bg-white/5 hover:bg-white/10 font-bold transition">🏠 Inicio</button>
-            
             <button id="btn-menu-publicar" onclick="irA('publicar')" class="hidden w-full text-left p-4 rounded-2xl bg-white/5 hover:bg-white/10 font-bold transition border border-blue-500/20">🚀 Publicar Addon</button>
-            
             <hr class="border-white/10 my-4">
-            
             <div id="auth-container">
                 <button id="btn-login" onclick="iniciarSesion()" class="w-full text-left p-4 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 font-bold transition border border-blue-500/50">🔵 Entrar con Google</button>
                 <button id="btn-logout" onclick="cerrarSesion()" class="hidden w-full text-left p-4 rounded-2xl bg-red-600/10 hover:bg-red-600/20 font-bold transition border border-red-500/20 text-red-400">🚪 Cerrar Sesión</button>
@@ -63,7 +60,7 @@
                 <div class="h-[1px] flex-1 bg-white/10 ml-4"></div>
             </div>
             <div id="lista-addons" class="space-y-4 text-center">
-                <div class="inline-block loading-spinner" style="display: inline-block;"></div>
+                <div class="inline-block loading-spinner" id="main-loader" style="display: inline-block;"></div>
             </div>
         </div>
 
@@ -72,23 +69,18 @@
                 <h2 class="text-xl font-black mb-6 text-blue-400 italic text-center uppercase">Subir Contenido</h2>
                 <div class="space-y-4">
                     <input type="text" id="add-title" placeholder="Nombre del Addon" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 outline-none focus:border-blue-500">
-                    
                     <select id="add-category" class="w-full bg-[#1a1a2e] p-4 rounded-2xl border border-white/10 outline-none text-gray-400">
                         <option value="Addon">Tipo: Addon</option>
                         <option value="Texture">Tipo: Textura</option>
                         <option value="Map">Tipo: Mapa</option>
                         <option value="Other">Tipo: Otro</option>
                     </select>
-
                     <textarea id="add-desc" placeholder="¿De qué trata tu creación?..." class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 h-24 resize-none focus:border-blue-500"></textarea>
-                    
                     <input type="text" id="add-link" placeholder="Link de descarga (Mediafire/Drive)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 focus:border-blue-500">
-                    
                     <label class="w-full bg-white/5 p-6 rounded-3xl border-2 border-dashed border-white/10 flex flex-col items-center cursor-pointer hover:bg-white/10 transition">
                         <span id="file-name" class="text-[10px] font-black uppercase text-gray-400">Seleccionar Miniatura</span>
                         <input type="file" id="add-image" accept="image/*" class="hidden" onchange="actualizarNombreArchivo(this)">
                     </label>
-
                     <button id="btn-subir" onclick="publicarAddon()" class="btn-primary w-full py-4 rounded-2xl font-black flex items-center justify-center gap-3">
                         <span id="btn-text">SUBIR AHORA</span>
                         <div id="btn-loader" class="loading-spinner"></div>
@@ -119,27 +111,26 @@
 
         let usuarioActual = null;
 
-        // --- LÓGICA DE USUARIO ---
+        // --- LÓGICA DE USUARIO (MODO REDIRECCIÓN) ---
         function iniciarSesion() {
-    // Esto en lugar de abrir una ventana, mueve toda la página a Google
-    auth.signInWithRedirect(provider);
-}
-
-// Añade esto debajo para que cuando regrese de Google, reconozca al usuario
-auth.getRedirectResult().then((result) => {
-    if (result && result.user) {
-        console.log("Sesión iniciada correctamente");
-    }
-}).catch((error) => {
-    console.error("Error al volver de Google:", error.message);
-});
+            // Usamos Redirect para que funcione en móviles
+            auth.signInWithRedirect(provider);
+        }
 
         function cerrarSesion() {
-    auth.signOut().then(() => {
-        window.location.reload();
-    });
+            auth.signOut().then(() => {
+                window.location.reload();
+            });
         }
-        
+
+        // Manejar el resultado de la redirección al cargar la página
+        auth.getRedirectResult().then((result) => {
+            if (result && result.user) {
+                console.log("Sesión iniciada con éxito");
+            }
+        }).catch((error) => {
+            console.error("Error al regresar de Google:", error.message);
+        });
 
         auth.onAuthStateChanged((user) => {
             const btnPublicar = document.getElementById('btn-menu-publicar');
@@ -148,15 +139,14 @@ auth.getRedirectResult().then((result) => {
 
             if (user) {
                 usuarioActual = user;
-                btnPublicar.classList.remove('hidden');
-                btnLogin.classList.add('hidden');
-                btnLogout.classList.remove('hidden');
+                if(btnPublicar) btnPublicar.classList.remove('hidden');
+                if(btnLogin) btnLogin.classList.add('hidden');
+                if(btnLogout) btnLogout.classList.remove('hidden');
             } else {
                 usuarioActual = null;
-                btnPublicar.classList.add('hidden');
-                btnLogin.classList.remove('hidden');
-                btnLogout.classList.add('hidden');
-                irA('inicio');
+                if(btnPublicar) btnPublicar.classList.add('hidden');
+                if(btnLogin) btnLogin.classList.remove('hidden');
+                if(btnLogout) btnLogout.classList.add('hidden');
             }
         });
 
@@ -165,8 +155,12 @@ auth.getRedirectResult().then((result) => {
         
         function irA(seccion) {
             if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
-            ['inicio', 'publicar'].forEach(s => document.getElementById('seccion-' + s).classList.add('hidden'));
-            document.getElementById('seccion-' + seccion).classList.remove('hidden');
+            ['inicio', 'publicar'].forEach(s => {
+                const el = document.getElementById('seccion-' + s);
+                if(el) el.classList.add('hidden');
+            });
+            const target = document.getElementById('seccion-' + seccion);
+            if(target) target.classList.remove('hidden');
             window.scrollTo(0,0);
         }
 
@@ -180,6 +174,9 @@ auth.getRedirectResult().then((result) => {
         // --- RENDERIZADO DE DATOS ---
         db.collection("addons").orderBy("fecha", "desc").onSnapshot((snapshot) => {
             const lista = document.getElementById('lista-addons');
+            const mainLoader = document.getElementById('main-loader');
+            if(mainLoader) mainLoader.style.display = "none";
+            
             lista.innerHTML = ""; 
             snapshot.forEach((doc) => {
                 const data = doc.data();
@@ -213,7 +210,7 @@ auth.getRedirectResult().then((result) => {
             if(imagenInput.files[0].size > 850000) return alert("Imagen muy pesada (máx 800KB).");
 
             btn.disabled = true;
-            loader.style.display = "block";
+            if(loader) loader.style.display = "block";
 
             const lector = new FileReader();
             lector.onload = function(e) {
@@ -227,11 +224,12 @@ auth.getRedirectResult().then((result) => {
                     uid: usuarioActual.uid,
                     fecha: Date.now()
                 }).then(() => {
-                    location.reload(); // Recarga para limpiar todo
+                    alert("¡Publicado con éxito!");
+                    window.location.reload();
                 }).catch(err => {
                     alert("Error al subir.");
                     btn.disabled = false;
-                    loader.style.display = "none";
+                    if(loader) loader.style.display = "none";
                 });
             };
             lector.readAsDataURL(imagenInput.files[0]);
